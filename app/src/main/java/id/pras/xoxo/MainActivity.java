@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import id.pras.xoxo.ui.Board;
 import id.pras.xoxo.databinding.ActivityMainBinding;
 
 public class MainActivity extends Activity {
@@ -48,5 +47,4 @@ public class MainActivity extends Activity {
     winState = null;
   }
   
-      }
-      
+}
