@@ -8,9 +8,17 @@ public final class Evaluator {
   @Deprecated
   public Evaluator() {}
 
-  public static int CalcScore(int[][] board, int winSize){
-		return CalcVerticalScore(board,winSize)+CalcHorizontalScore(board,winSize)+CalcVerticalScore(board,winSize);
-	}
+  public static int CalcScore(int[][] board, int winSize) {
+    if (isWin(board, winSize, O)) {
+      return Integer.MAX_VALUE;
+    } else if (isWin(board, winSize, X)) {
+      return Integer.MIN_VALUE;
+    }
+    return CalcVerticalScore(board, winSize)
+        + CalcHorizontalScore(board, winSize)
+        + CalcVerticalScore(board, winSize);
+  }
+
   private static int CalcVerticalScore(int[][] board, int winSize) {
     int yLen = board.length;
     int xLen = 0;
@@ -22,41 +30,7 @@ public final class Evaluator {
     if (xLen != yLen) {
       throw new IllegalArgumentException("Board must be square! boardSize :" + xLen + "×" + yLen);
     }
-
-    for (int x = 0; x < xLen; x++) {
-      for (int startY = 0; startY <= yLen - winSize; startY++) {
-        int tmpScore = 0;
-        boolean blockedStart = false;
-        boolean blockedEnd = false;
-
-        for (int i = 0; i < winSize; i++) {
-          int currValue = board[startY + i][x];
-
-          if (i == 0 && (startY == 0 || board[startY - 1][x] != 0)) {
-            blockedStart = true;
-          }
-
-          if (currValue == O) {
-            tmpScore++;
-          } else if (currValue == X) {
-            tmpScore--;
-          }
-
-          if (i == winSize - 1 && (startY + winSize == yLen || board[startY + winSize][x] != 0)) {
-            blockedEnd = true;
-          }
-        }
-
-        if (blockedStart && blockedEnd) {
-          tmpScore = 0;
-        } else if (blockedStart || blockedEnd) {
-          tmpScore -= (tmpScore > 0) ? 1 : -1;
-        }
-
-        result += tmpScore;
-      }
-    }
-
+    for (int x = 0; x < xLen; x++) result += CalcStraightScore(board[x]);
     return result;
   }
 
@@ -73,37 +47,9 @@ public final class Evaluator {
     }
 
     for (int y = 0; y < yLen; y++) {
-      for (int startX = 0; startX <= xLen - winSize; startX++) {
-        int tmpScore = 0;
-        boolean blockedStart = false;
-        boolean blockedEnd = false;
-
-        for (int i = 0; i < winSize; i++) {
-          int currValue = board[y][startX + i];
-
-          if (i == 0 && (startX == 0 || board[y][startX - 1] != 0)) {
-            blockedStart = true;
-          }
-
-          if (currValue == O) {
-            tmpScore++;
-          } else if (currValue == X) {
-            tmpScore--;
-          }
-
-          if (i == winSize - 1 && (startX + winSize == xLen || board[y][startX + winSize] != 0)) {
-            blockedEnd = true;
-          }
-        }
-
-        if (blockedStart && blockedEnd) {
-          tmpScore = 0;
-        } else if (blockedStart || blockedEnd) {
-          tmpScore -= (tmpScore > 0) ? 1 : -1;
-        }
-
-        result += tmpScore;
-      }
+      int[] straight = new int[board.length];
+      for (int x = 0; x < board.length; x++) straight[x] = board[x][y];
+      CalcStraightScore(straight);
     }
 
     return result;
@@ -121,76 +67,78 @@ public final class Evaluator {
       throw new IllegalArgumentException("Board must be square! boardSize :" + xLen + "×" + yLen);
     }
 
-    // Diagonal dari kiri atas ke kanan bawah
+    // Diagonal dari kiri atas ke kanan bawah=
     for (int startY = 0; startY <= yLen - winSize; startY++) {
-      for (int startX = 0; startX <= xLen - winSize; startX++) {
-        int tmpScore = 0;
-        boolean blockedStart = false;
-        boolean blockedEnd = false;
-
-        for (int i = 0; i < winSize; i++) {
-          int currValue = board[startY + i][startX + i];
-
-          if (i == 0 && (startX == 0 || startY == 0 || board[startY - 1][startX - 1] != 0)) {
-            blockedStart = true;
-          }
-
-          if (currValue == O) {
-            tmpScore++;
-          } else if (currValue == X) {
-            tmpScore--;
-          }
-
-          if (i == winSize - 1 && (startX + winSize == xLen || startY + winSize == yLen || board[startY + winSize][startX + winSize] != 0)) {
-            blockedEnd = true;
-          }
-        }
-
-        if (blockedStart && blockedEnd) {
-          tmpScore = 0;
-        } else if (blockedStart || blockedEnd) {
-          tmpScore -= (tmpScore > 0) ? 1 : -1;
-        }
-
-        result += tmpScore;
-      }
+      IntArr updown = new IntArr(yLen - winSize);
+      for (int startX = 0; startX <= xLen - winSize; startX++) {}
     }
 
     // Diagonal dari kanan atas ke kiri bawah
     for (int startY = 0; startY <= yLen - winSize; startY++) {
-      for (int startX = winSize - 1; startX < xLen; startX++) {
-        int tmpScore = 0;
-        boolean blockedStart = false;
-        boolean blockedEnd = false;
-
-        for (int i = 0; i < winSize; i++) {
-          int currValue = board[startY + i][startX - i];
-
-          if (i == 0 && (startX == xLen - 1 || startY == 0 || board[startY - 1][startX + 1] != 0)) {
-            blockedStart = true;
-          }
-
-          if (currValue == O) {
-            tmpScore++;
-          } else if (currValue == X) {
-            tmpScore--;
-          }
-
-          if (i == winSize - 1 && (startX == winSize - 1 || startY + winSize == yLen || board[startY + winSize][startX - winSize] != 0)) {
-            blockedEnd = true;
-          }
-        }
-
-        if (blockedStart && blockedEnd) {
-          tmpScore = 0;
-        } else if (blockedStart || blockedEnd) {
-          tmpScore -= (tmpScore > 0) ? 1 : -1;
-        }
-
-        result += tmpScore;
-      }
+      for (int startX = winSize - 1; startX < xLen; startX++) {}
     }
 
+    return result;
+  }
+
+  /* menghitung score berdasarkan jumlah simbol pada array
+   * jika simbol diblokir di salah satu ujung(awal atau akhir) maka nilainya dikurangi 1
+   * jika simbol diblokir di keduanya maka nilai sementara simbol itu menjadi 0
+   */
+  private static int CalcStraightScore(int[] side) {
+    int result = 0;
+    boolean blockedO = false;
+    boolean blockedX = false;
+    int prevVal = 0;
+    int tmpScoreO =0;
+    int tmpScoreX = 0;
+    int ScoreO = 0;
+    int ScoreX = 0;
+    for (int i = 0; i < side.length; i++) {
+      int currVal = side[i];
+      if (i == 0) {
+        blockedO = currVal == O ? false : true;
+        blockedX = currVal == X ? false : true;
+      } else if(i!=side.length){
+        if (blockedX&&!blockedO) {
+          if (currVal == O) tmpScoreO++;
+          
+          //tidak menambahkan nilai ke O karena diblokir
+          if (currVal == X) blockedO=true;
+        }
+        else if(blockedO&&!blockedX){
+          if (currVal == X) tmpScoreO++;
+          
+          //tidak menambahkan nilai ke X karena diblokir
+          if (currVal == O) blockedX=true;
+        }
+        else if(blockedO&&blockedX){
+          if(currVal==NULL_HANDLE){
+            //menambahkan score O dan score X serta mereset tmpScoreO dan tmpScoreX
+            blockedO=blockedX=false;
+            ScoreO+=tmpScoreO;
+            ScoreX+=tmpScoreX;
+            tmpScoreO=tmpScoreX=0;
+          }
+          else if(prevVal==O&&currVal==O){
+            tmpScoreO++;
+          }
+          else if(prevVal==X&&currVal==X){
+            tmpScoreX--;
+          }
+          else{
+            tmpScoreO=tmpScoreX=0;
+          }
+        }
+        else{
+          if(currVal==O) tmpScoreO++;
+          if(currVal==X) tmpScoreX--;
+        }
+      } else{
+        if(blockedO&&currVal==X) tmpScoreO=0;
+      }
+      prevVal = currVal;
+    }
     return result;
   }
 
@@ -213,6 +161,7 @@ public final class Evaluator {
     }
     return false;
   }
+
   // mengevaluasi kemenangan pada arah vertikal
   private static boolean evaluateVertical(int[][] board, int winSize, int role) {
     int sideSize = board.length;

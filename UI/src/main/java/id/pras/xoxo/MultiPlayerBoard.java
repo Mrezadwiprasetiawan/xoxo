@@ -31,5 +31,7 @@ public class MultiPlayerBoard extends Board{
 		return super.onTouchEvent(event);
 	}
 	
-	
+  public void setFirstPlayer(int player){
+     setCurrentPlayer(player);
+  }
 }
