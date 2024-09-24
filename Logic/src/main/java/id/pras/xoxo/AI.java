@@ -11,10 +11,10 @@ public abstract class AI {
   private int sideSize;
   private int winSize;
 
-  public AI(int[][] board,int sideSize, int winSize) {
+  public AI(int[][] board, int sideSize, int winSize) {
     this.board = board;
-	  this.sideSize=sideSize;
-	  this.winSize=winSize;
+    this.sideSize = sideSize;
+    this.winSize = winSize;
   }
 
   public void Start() {
@@ -47,11 +47,11 @@ public abstract class AI {
   public int[] getResult() {
     return this.result;
   }
-  
-  protected void setResult(int X, int Y){
-		result[0]=X;
-		result[1]=Y;
-	}
+
+  protected void setResult(int X, int Y) {
+    result[0] = X;
+    result[1] = Y;
+  }
 
   public boolean IsRunning() {
     return this.isRunning;
@@ -65,15 +65,15 @@ public abstract class AI {
     return this.board;
   }
 
-  protected void setBoard(int[][] board) {
+  public void setBoard(int[][] board) {
     this.board = board;
   }
-  
-  protected int sideSize(){
-		return sideSize;
-	}
-	
-	protected int winSize(){
-		return winSize;
-	}
+
+  protected int sideSize() {
+    return sideSize;
+  }
+
+  protected int winSize() {
+    return winSize;
+  }
 }

@@ -17,7 +17,9 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     binding = ActivityMainBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
-    Board board = new MultiPlayerBoard(getBaseContext(),25, 5);
+    DebugBoard debugBoard = new DebugBoard(getBaseContext(), 25, 5);
+    int score = debugBoard.score();
+    Board board = debugBoard;
     board.setLayoutParams(
         new ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -34,7 +36,7 @@ public class MainActivity extends Activity {
                     binding.getRoot().removeView(board);
                   });
             });
-	  winState.start();
+    winState.start();
   }
 
   @Override
@@ -46,5 +48,4 @@ public class MainActivity extends Activity {
     }
     winState = null;
   }
-  
 }

@@ -9,22 +9,23 @@ public class BaseAI extends AI {
   private int selfScore;
 
   public BaseAI(int[][] board) {
-    super(board,3,3);
+    super(board, 3, 3);
     ThreadCount = 1;
   }
 
   public BaseAI(int[][] board, int ThreadCount) {
-    super(board,3,3);
+    super(board, 3, 3);
     this.ThreadCount = ThreadCount;
   }
-  
+
   public BaseAI(int[][] board, int sideSize, int winSize) {
-    super(board,sideSize,winSize);
+    super(board, sideSize, winSize);
     this.ThreadCount = ThreadCount;
   }
 
   @Override
   protected void Thinking() {
+    setRunning(true);
     for (int i = 0; i < ThreadCount; i++) {
       new Thread(
               () -> {
@@ -43,11 +44,11 @@ public class BaseAI extends AI {
     return result;
   }
 
-  private int selfBestScore(int[][] board, int winSize){
-	  return 0;
-	}
+  private int selfBestScore(int[][] board, int winSize) {
+    return 0;
+  }
 
   private int enemyBestScore(int[][] board, int winSize) {
-		return 0;
-	}
+    return 0;
+  }
 }

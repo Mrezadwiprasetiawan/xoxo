@@ -1,5 +1,6 @@
 package id.pras.xoxo;
 
+// Kelas untuk mensupport pembuatan fixed array Integer agar pengisiannya lebih mudah
 public class IntArr {
   private int[] values;
   private int size;
@@ -36,7 +37,7 @@ public class IntArr {
   }
 
   public int get(int index) {
-    if (!(index <= size - 1)) {
+    if (index >= size) {
       throw new IndexOutOfBoundsException(
           "Cant get Integer on the Index>=Size! index" + index + " size:" + size);
     }
@@ -64,8 +65,8 @@ public class IntArr {
     }
     return result;
   }
-  
-  public int currIndex(){
-		return index;
-	}
+
+  public int currIndex() {
+    return index;
+  }
 }

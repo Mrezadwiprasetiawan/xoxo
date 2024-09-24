@@ -8,9 +8,9 @@ import android.view.MotionEvent;
 import android.view.View;
 
 public abstract class Board extends View {
-  public static final int NULL_HANDLE=0;
-  public static final int X=1;
-  public static final int O=2;
+  public static final int NULL_HANDLE = 0;
+  public static final int O = 1;
+  public static final int X = -1;
 
   private final int PADDING_PX = 50; // Tambahkan padding yang lebih besar
   private Paint paint = new Paint();
@@ -33,7 +33,7 @@ public abstract class Board extends View {
     this.winSize = winSize;
     board = new int[sideSize][sideSize];
     paint.setStrokeWidth(4);
-	  setCurrentPlayer(O);
+    setCurrentPlayer(O);
   }
 
   public boolean setValue(int x, int y, int xoxo) {
@@ -138,11 +138,14 @@ public abstract class Board extends View {
       }
 
       if (changePlayer) {
+        if (Evaluator.isWin(board, winSize, player)) {
+          setWinState(true);
+        }
         setCurrentPlayer(player == X ? O : X);
-				return true;
-      }else{
-				return false;
-			}
+        return true;
+      } else {
+        return false;
+      }
     }
     return super.onTouchEvent(event);
   }

@@ -1,5 +1,8 @@
 package id.pras.xoxo;
 
+import java.io.IOException;
+
+// AI untuk membruteforce setiap langkah yang mungkin dan menyimpannya dalam file data
 public class BFAI extends AI {
   private String dataPath;
   private int ThreadCount;
@@ -18,14 +21,10 @@ public class BFAI extends AI {
     this.ThreadCount = ThreadCount;
   }
 
-  public void train(int i) {
-    //implementasi kode pelatihan
-    try{
-      writeData(datas);
-      this.hasData=true;
-    }
-    catch(IOException){
-      this.hasData=false;
+  public void train(long timeout) {
+    long startTime = System.currentTimeMillis();
+    while (System.currentTimeMillis() - startTime <= timeout) {
+      // implementasi kode pelatihan disini
     }
   }
 
@@ -33,17 +32,18 @@ public class BFAI extends AI {
   protected void Thinking() {
     setRunning(true);
     for (int i = 0; i < ThreadCount; i++) {
-      new Thread(() -> {
-        if (hasData) {
-          // implementasi pembacaan data di sini
-        } else {
-          // implementasi kode bruteforcing di sini
-        }
-      }).start(); // Pastikan thread dijalankan
+      new Thread(
+              () -> {
+                if (hasData) {
+                  // implementasi pembacaan data di sini
+                } else {
+                  // implementasi kode bruteforcing di sini
+                }
+              })
+          .start(); // Pastikan thread dijalankan
     }
     setRunning(false);
   }
-  private void writeData(Data[] data){
-     
-  }
+
+  private void writeData(Data[] data) {}
 }
