@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
                     android.widget.Toast.makeText(
                             getBaseContext(),
                             "Role " + (board.getCurrentPlayer() == 1 ? "O" : "X") + " is Win",
-                            1)
+                            android.widget.Toast.LENGTH_LONG)
                         .show();
                   });
             });

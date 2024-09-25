@@ -34,9 +34,9 @@ public class SinglePlayerBoard extends Board {
     // Tangani event sentuh hanya jika action-nya adalah ACTION_DOWN
     if (event.getAction() == MotionEvent.ACTION_DOWN && !isProcessingMove) {
       int score = Evaluator.calcScore(getBoard(), getWinSize());
-      android.widget.Toast.makeText(getContext(), "Score = " + score, 1).show();
+      android.widget.Toast.makeText(getContext(), "Score = " + score, android.widget.Toast.LENGTH_LONG).show();
       if (ai.IsRunning()) {
-        android.widget.Toast.makeText(getContext(), "AI sedang berfikir", 1).show();
+        android.widget.Toast.makeText(getContext(), "AI sedang berfikir", android.widget.Toast.LENGTH_LONG).show();
         return false;
       }
 
@@ -65,7 +65,7 @@ public class SinglePlayerBoard extends Board {
                     boolean success = setValue(result[0], result[1], ai.getRole());
                     if (!success) {
                       android.widget.Toast.makeText(
-                              getContext(), "AI memilih posisi yang sudah diisi", 1)
+                              getContext(), "AI memilih posisi yang sudah diisi", android.widget.Toast.LENGTH_LONG)
                           .show();
                     }
 
