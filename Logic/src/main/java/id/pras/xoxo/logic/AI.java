@@ -1,4 +1,4 @@
-package id.pras.xoxo;
+package id.pras.xoxo.logic;
 
 public abstract class AI {
   private final int[] result = new int[2];
@@ -10,19 +10,24 @@ public abstract class AI {
   private final int O = 2;
   private int sideSize;
   private int winSize;
+  private long timeout;
 
   public AI(int[][] board, int sideSize, int winSize) {
     this.board = board;
     this.sideSize = sideSize;
     this.winSize = winSize;
   }
+  
+  public void setTimeout(long nanoTimeout){
+    this.timeout=nanoTimeout;
+  }
 
   public void Start() {
     setRunning(true);
-    Thinking();
+    thinking(timeout);
   }
 
-  protected abstract void Thinking();
+  protected abstract void thinking(long timeoutNano);
 
   public int NULL_HANDLE() {
     return this.NULL_HANDLE;

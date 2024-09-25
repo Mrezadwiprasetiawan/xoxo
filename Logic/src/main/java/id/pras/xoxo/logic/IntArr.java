@@ -1,4 +1,4 @@
-package id.pras.xoxo;
+package id.pras.xoxo.logic;
 
 // Kelas untuk mensupport pembuatan fixed array Integer agar pengisiannya lebih mudah
 public class IntArr {
@@ -52,6 +52,7 @@ public class IntArr {
     for (int i = 0; i < size; i++) {
       this.values[i] = 0;
     }
+    index=0;
   }
 
   public int[] values() {

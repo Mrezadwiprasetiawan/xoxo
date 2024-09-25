@@ -1,4 +1,4 @@
-package id.pras.xoxo;
+package id.pras.xoxo.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
+import id.pras.xoxo.logic.Evaluator;
 
 public abstract class Board extends View {
   public static final int NULL_HANDLE = 0;
@@ -126,7 +127,7 @@ public abstract class Board extends View {
     super.onDraw(canvas);
     drawBoard(canvas);
   }
-
+  
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     if (event.getAction() == 0) {
@@ -140,8 +141,9 @@ public abstract class Board extends View {
       if (changePlayer) {
         if (Evaluator.isWin(board, winSize, player)) {
           setWinState(true);
+        }else{
+          setCurrentPlayer(player == X ? O : X);
         }
-        setCurrentPlayer(player == X ? O : X);
         return true;
       } else {
         return false;
@@ -165,4 +167,5 @@ public abstract class Board extends View {
   protected void setCurrentPlayer(int player) {
     this.player = player;
   }
+  
 }

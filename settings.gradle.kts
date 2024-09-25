@@ -16,6 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "XOXO"
 
-include(":app")
-include(":Logic")
-include(":UI")
+include(":Logic", ":UI", ":app")

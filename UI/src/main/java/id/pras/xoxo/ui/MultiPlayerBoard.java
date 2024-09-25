@@ -1,4 +1,4 @@
-package id.pras.xoxo;
+package id.pras.xoxo.ui;
 
 import android.content.Context;
 import android.view.MotionEvent;
@@ -29,7 +29,7 @@ public class MultiPlayerBoard extends Board {
     return super.onTouchEvent(event);
   }
 
-  public void setFirstPlayer(int player) {
+  public void setCurrentPlayer(int player) {
     setCurrentPlayer(player);
   }
 }
