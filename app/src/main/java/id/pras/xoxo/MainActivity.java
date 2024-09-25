@@ -21,7 +21,6 @@ public class MainActivity extends Activity {
     binding = ActivityMainBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
     
-    int score = debugBoard.getScore();
     SinglePlayerBoard singleboard = new SinglePlayerBoard(getBaseContext(), 7, 5,Board.O);
     Board board = singleboard;
     board.setLayoutParams(
