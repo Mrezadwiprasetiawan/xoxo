@@ -5,16 +5,13 @@ public abstract class AI {
   private boolean isRunning = false;
   protected int[][] board;
   private int role;
-  private final int NULL_HANDLE = 0;
-  private final int X = 1;
-  private final int O = 2;
   private int sideSize;
   private int winSize;
   private long timeout;
 
-  public AI(int[][] board, int sideSize, int winSize) {
+  public AI(int[][] board, int winSize) {
     this.board = board;
-    this.sideSize = sideSize;
+    this.sideSize = board.length;
     this.winSize = winSize;
   }
   
@@ -29,17 +26,6 @@ public abstract class AI {
 
   protected abstract void thinking(long timeoutNano);
 
-  public int NULL_HANDLE() {
-    return this.NULL_HANDLE;
-  }
-
-  public int X() {
-    return this.X;
-  }
-
-  public int O() {
-    return this.O;
-  }
 
   public int getRole() {
     return this.role;

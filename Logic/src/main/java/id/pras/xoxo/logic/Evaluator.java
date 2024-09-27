@@ -57,7 +57,7 @@ public final class Evaluator {
     for (int y = 0; y < yLen; y++) {
       int[] straight = new int[board.length];
       for (int x = 0; x < board.length; x++) straight[x] = board[x][y];
-      calcStraightScore(straight, winSize);
+      result += calcStraightScore(straight, winSize);
     }
 
     return result;
@@ -99,11 +99,6 @@ public final class Evaluator {
       result += calcStraightScore(diagonal2, winSize);
     }
 
-    // Diagonal dari kanan atas ke kiri bawah
-    for (int startY = 0; startY <= yLen - winSize; startY++) {
-      for (int startX = winSize - 1; startX < xLen; startX++) {}
-    }
-
     return result;
   }
 
@@ -111,8 +106,8 @@ public final class Evaluator {
    * jika simbol diblokir di salah satu ujung(awal atau akhir) maka nilai sementara urutan simbol dikurangi 1
    * jika simbol diblokir di keduanya maka nilai sementara urutan simbol itu menjadi 0
    */
-  // sementara dibuat private
-  private static int calcStraightScore(int[] side, int winSize) {
+  // dibuat publik untuk debugging atau kegunaan lain
+  public static int calcStraightScore(int[] side, int winSize) {
     int result = 0;
     int prevVal = NULL_HANDLE;
     ArrayList<Sequence> elements = new ArrayList<>();
@@ -124,7 +119,6 @@ public final class Evaluator {
 
       // Penanganan elemen pertama
       if (i == 0) {
-        // elemen pertama ditandai diblokir karena tidak ada ruang kosong sebelum elemen pertama
         if (currVal == O) {
           elementO.add();
           elementO.setBlockedStart();
@@ -142,7 +136,6 @@ public final class Evaluator {
             elementX.add();
           }
         } else {
-          // Menangani transisi antar elemen
           if (currVal == O) {
             elementX.setBlockedEnd();
             elements.add(elementX);
@@ -156,7 +149,6 @@ public final class Evaluator {
             elementX.setBlockedStart();
             elementX.add();
           } else {
-            // jika element saat ini kosong
             if (prevVal == O) {
               elements.add(elementO);
               elementO = new Sequence(O, winSize); // Reset sequence O
@@ -169,15 +161,13 @@ public final class Evaluator {
       }
       // Penanganan elemen terakhir
       else {
-        // elemen terakhir ditandai diblokir karena tidak ada ruang kosong setelahnya
         if (currVal != NULL_HANDLE) {
           if (currVal == O) {
             elementO.add();
             if (prevVal == X) {
               elementO.setBlockedStart();
               elementO.setBlockedEnd();
-            }
-            if (prevVal == O) {
+            } else {
               elementO.setBlockedEnd();
             }
             elements.add(elementO);
@@ -186,16 +176,17 @@ public final class Evaluator {
             if (prevVal == O) {
               elementX.setBlockedStart();
               elementX.setBlockedEnd();
-            }
-            if (prevVal == X) {
+            } else {
               elementX.setBlockedEnd();
             }
             elements.add(elementX);
           }
-        } else if (prevVal == O) {
-          elements.add(elementO);
-        } else if (prevVal == X) {
-          elements.add(elementX);
+        } else {
+          if (prevVal == O) {
+            elements.add(elementO);
+          } else if (prevVal == X) {
+            elements.add(elementX);
+          }
         }
       }
 
@@ -234,8 +225,23 @@ public final class Evaluator {
       this.blockedStart = true;
     }
 
+    // debugging
+    public boolean getBlockedStart() {
+      return this.blockedStart;
+    }
+
+    // debugging
+    public boolean getBlockedEnd() {
+      return this.blockedEnd;
+    }
+
     public void setBlockedEnd() {
       this.blockedEnd = true;
+    }
+
+    // debugging
+    public int realScore() {
+      return score;
     }
 
     public int score() {
@@ -244,7 +250,7 @@ public final class Evaluator {
       } else if (blockedStart && blockedEnd) {
         return 0; // Jika diblokir di kedua sisi
       } else {
-        return score >= winSize ? score * 2 : score; // Jika tidak diblokir
+        return score >= winSize - 2 ? score * 2 : score; // Jika tidak diblokir
       }
     }
   }

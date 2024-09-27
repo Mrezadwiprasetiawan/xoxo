@@ -10,12 +10,12 @@ public class BFAI extends BaseAI {
   private boolean hasData = false;
 
   public BFAI(int[][] board, int role) {
-    this(board, 3, 3, role);
+    this(board, 3, role);
     setThreadCount(1);
   }
 
-  public BFAI(int[][] board, int sideSize, int winSize, int role) {
-    super(board, sideSize, winSize, role);
+  public BFAI(int[][] board, int winSize, int role) {
+    super(board, winSize, role);
   }
 
   public void train(long timeout) {

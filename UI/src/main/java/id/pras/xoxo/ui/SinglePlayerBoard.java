@@ -42,9 +42,9 @@ public class SinglePlayerBoard extends Board {
 
       // Mulai memproses langkah
       isProcessingMove = true;
-      boolean parentChangePlayer = super.onTouchEvent(event);
 
-      if (parentChangePlayer) {
+      boolean changePlayer= super.onTouchEvent(event);
+      if (changePlayer) {
         int role = getCurrentPlayer();
         // Jika giliran AI
         if (role == ai.getRole() && !ai.IsRunning()) {
@@ -62,8 +62,7 @@ public class SinglePlayerBoard extends Board {
                     int[] result = ai.getResult();
 
                     // Pastikan nilai bisa diset di papan
-                    boolean success = setValue(result[0], result[1], ai.getRole());
-                    if (!success) {
+                    if (!setValue(result[0], result[1], ai.getRole())) {
                       android.widget.Toast.makeText(
                               getContext(), "AI memilih posisi yang sudah diisi", android.widget.Toast.LENGTH_LONG)
                           .show();
@@ -86,7 +85,7 @@ public class SinglePlayerBoard extends Board {
       }
       isProcessingMove = false;
     }
-    return super.onTouchEvent(event);
+    return false;
   }
 
   public AI getAi() {

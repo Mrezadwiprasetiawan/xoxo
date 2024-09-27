@@ -1,6 +1,6 @@
 package id.pras.xoxo.logic;
 
-import id.pras.xoxo.runtimeexception.UnsupportedFile;
+import id.pras.xoxo.logic.runtimeexception.UnsupportedFile;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

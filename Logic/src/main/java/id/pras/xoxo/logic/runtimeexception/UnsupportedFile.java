@@ -1,4 +1,4 @@
-package id.pras.xoxo.runtimeexception;
+package id.pras.xoxo.logic.runtimeexception;
 
 
 public class UnsupportedFile extends RuntimeException{

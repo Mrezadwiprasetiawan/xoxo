@@ -12,9 +12,9 @@ public class MultiPlayerBoard extends Board {
     super(context, sideSize, winSize);
   }
 
-  public MultiPlayerBoard(Context context, int sideSize, int winSize, int bg) {
+  public MultiPlayerBoard(Context context, int sideSize, int winSize, int player) {
     super(context, sideSize, winSize);
-    setBackgroundColor(bg);
+    setCurrentPlayer(player);
   }
 
   public MultiPlayerBoard(Context context, int sideSize, int winSize, int player, int bg) {
@@ -29,7 +29,7 @@ public class MultiPlayerBoard extends Board {
     return super.onTouchEvent(event);
   }
 
-  public void setCurrentPlayer(int player) {
+  public void setFirstPlayer(int player) {
     setCurrentPlayer(player);
   }
 }
