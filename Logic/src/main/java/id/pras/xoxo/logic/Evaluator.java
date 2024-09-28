@@ -5,22 +5,21 @@ import java.util.ArrayList;
 /*
  * Kelas statis untuk mengevaluasi logika permainan
  * metode publik yang bisa dipakai adalah :
- *   calcScore(int[][] board, int winSize) :
+ *   calcScore(byte[][] board, int winSize) :
  *     metode untuk menghitung Skor total
- *   isWin(int[][] board, int winSize, int role) :
+ *   isWin(byte[][] board, int winSize, byte role) :
  *     metode untuk memeriksa apakah role tertentu menang
  * kelas dibuat final agar tidak bisa diturunkan
  */
 public final class Evaluator {
-  private static final int NULL_HANDLE = 0;
-  private static final int X = -1;
-  private static final int O = 1;
-
+  private static final byte NULL_HANDLE=0;
+  private static final byte O=1;
+  private static final byte X=-1;
   // kelas sepenuhnya statis
   private Evaluator() {}
 
   // metode untuk menghitung skor
-  public static int calcScore(int[][] board, int winSize) {
+  public static int calcScore(byte[][] board, int winSize) {
     if (isWin(board, winSize, O)) {
       return Integer.MAX_VALUE;
     } else if (isWin(board, winSize, X)) {
@@ -32,7 +31,7 @@ public final class Evaluator {
   }
 
   // sementara dibuat private
-  private static int calcVerticalScore(int[][] board, int winSize) {
+  private static int calcVerticalScore(byte[][] board, int winSize) {
     int yLen = board.length;
     int xLen = 0;
     int result = 0;
@@ -45,7 +44,7 @@ public final class Evaluator {
   }
 
   // sementara dibuat private
-  private static int calcHorizontalScore(int[][] board, int winSize) {
+  private static int calcHorizontalScore(byte[][] board, int winSize) {
     int yLen = board.length;
     int xLen = 0;
     int result = 0;
@@ -55,7 +54,7 @@ public final class Evaluator {
       throw new IllegalArgumentException("Board must be square! boardSize :" + xLen + "×" + yLen);
 
     for (int y = 0; y < yLen; y++) {
-      int[] straight = new int[board.length];
+      byte[] straight = new byte[board.length];
       for (int x = 0; x < board.length; x++) straight[x] = board[x][y];
       result += calcStraightScore(straight, winSize);
     }
@@ -64,7 +63,7 @@ public final class Evaluator {
   }
 
   // sementara dibuat private
-  private static int calcDiagonalScore(int[][] board, int winSize) {
+  private static int calcDiagonalScore(byte[][] board, int winSize) {
     int yLen = board.length;
     int xLen = 0;
     int result = 0;
@@ -76,8 +75,8 @@ public final class Evaluator {
     int sideSize = board.length;
 
     for (int startX = 0; startX <= sideSize - winSize; startX++) {
-      int[] diagonal1 = new int[sideSize - startX];
-      int[] diagonal2 = new int[sideSize - startX];
+      byte[] diagonal1 = new byte[sideSize - startX];
+      byte[] diagonal2 = new byte[sideSize - startX];
       for (int i = 0; i < sideSize - startX; i++) {
         diagonal1[i] = board[startX + i][i]; // Diagonal dari kiri atas ke kanan bawah
         diagonal2[i] = board[i][startX + i]; // Diagonal dari kanan atas ke kiri bawah
@@ -87,8 +86,8 @@ public final class Evaluator {
     }
 
     for (int startX = 0; startX <= sideSize - winSize; startX++) {
-      int[] diagonal1 = new int[sideSize - startX];
-      int[] diagonal2 = new int[sideSize - startX];
+      byte[] diagonal1 = new byte[sideSize - startX];
+      byte[] diagonal2 = new byte[sideSize - startX];
       for (int i = 0; i < sideSize - startX; i++) {
         diagonal1[i] =
             board[i][sideSize - 1 - (startX + i)]; // Diagonal dari kiri bawah ke kanan atas
@@ -107,15 +106,15 @@ public final class Evaluator {
    * jika simbol diblokir di keduanya maka nilai sementara urutan simbol itu menjadi 0
    */
   // dibuat publik untuk debugging atau kegunaan lain
-  public static int calcStraightScore(int[] side, int winSize) {
+  public static int calcStraightScore(byte[] straight, int winSize) {
     int result = 0;
-    int prevVal = NULL_HANDLE;
+    byte prevVal = NULL_HANDLE;
     ArrayList<Sequence> elements = new ArrayList<>();
     Sequence elementO = new Sequence(O, winSize);
     Sequence elementX = new Sequence(X, winSize);
 
-    for (int i = 0; i < side.length; i++) {
-      int currVal = side[i];
+    for (int i = 0; i < straight.length; i++) {
+      byte currVal = straight[i];
 
       // Penanganan elemen pertama
       if (i == 0) {
@@ -128,7 +127,7 @@ public final class Evaluator {
         }
       }
       // Penanganan elemen di tengah-tengah array
-      else if (i != side.length - 1) {
+      else if (i != straight.length - 1) {
         if (prevVal == currVal || prevVal == NULL_HANDLE) {
           if (currVal == O) {
             elementO.add();
@@ -200,16 +199,34 @@ public final class Evaluator {
 
     return result;
   }
+  /*
+  Sequence[] existingSequences(byte[][] board, int winSize){
+    ArrayList<Sequence> result=new ArrayList<>();
+    //vertical array
+    Sequence tmpO;
+    Sequence tmpX;
+    for(int x=0;x<board.length;x++)
+      for(int y=0;y<board.length;y++){
+        board[x][y]=O;
+      }
+    return result.toArray(new Sequence[]{});
+  }
+  
+  Sequence[] existingSequence(){
+    ArrayList<Sequence> result=new ArrayList<>();
+    return result.toArray(new Sequence[]{});
+  }
+  */
 
   // kelas tambahan untuk dukungan penghitungan skor
   private static class Sequence {
-    private int type;
+    private byte type;
     private boolean blockedStart;
     private boolean blockedEnd;
     private int score;
     private int winSize;
 
-    public Sequence(int type, int winSize) {
+    public Sequence(byte type, int winSize) {
       this.type = type;
       blockedStart = false;
       blockedEnd = false;
@@ -260,7 +277,7 @@ public final class Evaluator {
    * metode ini memeriksa apakah ada role tertentu menang dalam arah vertikal, horizontal, maupun diagonal
    * dengan bantuan kelas IntArr
    */
-  public static boolean isWin(int[][] board, int winSize, int role) {
+  public static boolean isWin(byte[][] board, int winSize, byte role) {
     if (role == NULL_HANDLE)
       throw new IllegalArgumentException("role cant be NULL_HANDLE or 0 :" + role);
     if (!(role == O ^ role == X))
@@ -277,9 +294,9 @@ public final class Evaluator {
   }
 
   // mengevaluasi kemenangan pada arah vertikal
-  private static boolean evaluateVertical(int[][] board, int winSize, int role) {
+  private static boolean evaluateVertical(byte[][] board, int winSize, byte role) {
     int sideSize = board.length;
-    IntArr checker = new IntArr(winSize);
+    ByteArr checker = new ByteArr(winSize);
     for (int x = 0; x < sideSize; x++) {
       checker.resetAllToZero(); // Reset checker untuk setiap kolom
       for (int y = 0; y < sideSize; y++) {
@@ -294,9 +311,9 @@ public final class Evaluator {
   }
 
   // mengevaluasi kemenangan pada arah horizontal
-  private static boolean evaluateHorizontal(int[][] board, int winSize, int role) {
+  private static boolean evaluateHorizontal(byte[][] board, int winSize, byte role) {
     int sideSize = board.length;
-    IntArr checker = new IntArr(winSize);
+    ByteArr checker = new ByteArr(winSize);
     for (int y = 0; y < sideSize; y++) {
       checker.resetAllToZero(); // Reset checker untuk setiap baris
       for (int x = 0; x < sideSize; x++) {
@@ -311,13 +328,13 @@ public final class Evaluator {
   }
 
   // Mengevaluasi kemenangan pada arah diagonal
-  private static boolean evaluateDiagonal(int[][] board, int winSize, int role) {
+  private static boolean evaluateDiagonal(byte[][] board, int winSize, byte role) {
     int sideSize = board.length;
 
     // Evaluasi diagonal dari kiri atas ke kanan bawah
     for (int startX = 0; startX <= sideSize - winSize; startX++) {
-      int[] diagonal1 = new int[sideSize - startX];
-      int[] diagonal2 = new int[sideSize - startX];
+      byte[] diagonal1 = new byte[sideSize - startX];
+      byte[] diagonal2 = new byte[sideSize - startX];
       for (int i = 0; i < sideSize - startX; i++) {
         diagonal1[i] = board[startX + i][i]; // Diagonal dari kiri atas ke kanan bawah
         diagonal2[i] = board[i][startX + i]; // Diagonal dari kanan atas ke kiri bawah
@@ -330,8 +347,8 @@ public final class Evaluator {
 
     // Evaluasi diagonal dari kanan atas ke kiri bawah
     for (int startX = 0; startX <= sideSize - winSize; startX++) {
-      int[] diagonal1 = new int[sideSize - startX];
-      int[] diagonal2 = new int[sideSize - startX];
+      byte[] diagonal1 = new byte[sideSize - startX];
+      byte[] diagonal2 = new byte[sideSize - startX];
       for (int i = 0; i < sideSize - startX; i++) {
         diagonal1[i] =
             board[i][sideSize - 1 - (startX + i)]; // Diagonal dari kiri bawah ke kanan atas
@@ -348,8 +365,8 @@ public final class Evaluator {
   }
 
   // Mengevaluasi kemenangan untuk array 1 dimensi
-  private static boolean evaluateSingleArray(int[] arr, int winSize, int role) {
-    IntArr checker = new IntArr(winSize);
+  private static boolean evaluateSingleArray(byte[] arr, int winSize, byte role) {
+    ByteArr checker = new ByteArr(winSize);
     for (int i = 0; i < arr.length; i++) {
       if (arr[i] == role) {
         if (!checker.add(role)) return true;

@@ -3,14 +3,14 @@ package id.pras.xoxo.logic;
 public abstract class AI {
   private final int[] result = new int[2];
   private boolean isRunning = false;
-  protected int[][] board;
-  private int role;
+  private byte[][] board;
+  private byte role;
   private int sideSize;
   private int winSize;
   private long timeout;
 
-  public AI(int[][] board, int winSize) {
-    this.board = board;
+  public AI(byte[][] board, int winSize) {
+    this.board = board.clone();
     this.sideSize = board.length;
     this.winSize = winSize;
   }
@@ -24,14 +24,14 @@ public abstract class AI {
     thinking(timeout);
   }
 
-  protected abstract void thinking(long timeoutNano);
+  protected abstract void thinking(long nanoTimeout);
 
 
-  public int getRole() {
+  public byte getRole() {
     return this.role;
   }
 
-  protected void setRole(int role) {
+  protected void setRole(byte role) {
     this.role = role;
   }
 
@@ -52,12 +52,12 @@ public abstract class AI {
     this.isRunning = isRunning;
   }
 
-  protected int[][] getBoard() {
+  protected byte[][] getBoard() {
     return this.board;
   }
 
-  public void setBoard(int[][] board) {
-    this.board = board;
+  public void setBoard(byte[][] board) {
+    this.board = board.clone();
   }
 
   protected int sideSize() {

@@ -24,9 +24,9 @@ public class MainActivity extends Activity {
     setContentView(binding.getRoot());
 
     MultiPlayerBoard multiBoard = new MultiPlayerBoard(getBaseContext(), 8, 5, Board.O);
-    SinglePlayerBoard singleboard = new SinglePlayerBoard(getBaseContext(), 7, 5, Board.O);
+    SinglePlayerBoard singleboard = new SinglePlayerBoard(getBaseContext(), 8, 5, Board.O);
     Board board = singleboard;
-    BaseAI ai=new BaseAI(board.getBoard(),Board.O);
+    BaseAI ai=new BaseAI(board.getBoard(), 5, Board.O);
     board.setLayoutParams(
         new ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));

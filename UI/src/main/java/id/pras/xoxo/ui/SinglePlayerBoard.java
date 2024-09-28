@@ -1,91 +1,52 @@
 package id.pras.xoxo.ui;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.view.MotionEvent;
-import android.widget.Toast;
 import id.pras.xoxo.logic.AI;
 import id.pras.xoxo.logic.BaseAI;
 import id.pras.xoxo.logic.Evaluator;
-import id.pras.xoxo.ui.Board;
 
-public class SinglePlayerBoard extends Board {
+public class SinglePlayerBoard extends SimpleBoard {
   private AI ai;
-  private boolean isProcessingMove = false; // Penanda apakah ada langkah yang sedang diproses
 
   public SinglePlayerBoard(Context context) {
-    this(context,7,5,Board.O);
+    this(context, 7, 5, Board.O);
   }
-  
-  public SinglePlayerBoard(Context context, int sideSize, int winSize, int role) {
-    super(context, sideSize,winSize);
+
+  public SinglePlayerBoard(Context context, int sideSize, int winSize, byte role) {
+    super(context, sideSize, winSize);
     setCurrentPlayer(role);
-    initAI(role==Board.O?Board.X:Board.O);
+    initAI(role == Board.O ? Board.X : Board.O);
   }
 
   private void initAI(int role) {
-    ai = new BaseAI(getBoard(), getSideSize(), getWinSize(), role);
+    ai = new BaseAI(getBoard(), getWinSize(), role);
     ai.setTimeout(1000_000_000);
   }
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     // Tangani event sentuh hanya jika action-nya adalah ACTION_DOWN
-    if (event.getAction() == MotionEvent.ACTION_DOWN && !isProcessingMove) {
-      int score = Evaluator.calcScore(getBoard(), getWinSize());
-      android.widget.Toast.makeText(getContext(), "Score = " + score, android.widget.Toast.LENGTH_LONG).show();
-      if (ai.IsRunning()) {
-        android.widget.Toast.makeText(getContext(), "AI sedang berfikir", android.widget.Toast.LENGTH_LONG).show();
+    if (event.getAction() == 0) {
+      boolean changePlayer = false;
+      int boardX = (int) (event.getX() - getOffsetX()) / getCellSize();
+      int boardY = (int) (event.getY() - getOffsetY()) / getCellSize();
+      if (boardX >= 0 && boardX < getBoard().length && boardY >= 0 && boardY < getBoard().length) {
+        changePlayer = setValue(boardX, boardY);
+      }
+
+      if (changePlayer) {
+        if (Evaluator.isWin(getBoard(), getWinSize(), getCurrentPlayer())) {
+          setWinState(true);
+        } else {
+          setCurrentPlayer(getCurrentPlayer() == Board.X ? Board.O : Board.X);
+        }
+        return true;
+      } else {
         return false;
       }
-
-      // Mulai memproses langkah
-      isProcessingMove = true;
-
-      boolean changePlayer= super.onTouchEvent(event);
-      if (changePlayer) {
-        int role = getCurrentPlayer();
-        // Jika giliran AI
-        if (role == ai.getRole() && !ai.IsRunning()) {
-          // Jalankan AI
-          ai.Start();
-
-          // Buat thread untuk AI dan tunggu sampai selesai
-          new Thread(
-                  () -> {
-                    while (ai.IsRunning()) {
-                      // Tunggu hingga AI selesai
-                    }
-
-                    // Setelah AI selesai berpikir, dapatkan langkah AI
-                    int[] result = ai.getResult();
-
-                    // Pastikan nilai bisa diset di papan
-                    if (!setValue(result[0], result[1], ai.getRole())) {
-                      android.widget.Toast.makeText(
-                              getContext(), "AI memilih posisi yang sudah diisi", android.widget.Toast.LENGTH_LONG)
-                          .show();
-                    }
-
-                    // Cek kemenangan
-                    if (Evaluator.isWin(getBoard(), getWinSize(), getCurrentPlayer())) {
-                      setWinState(true);
-                    } else {
-                      setCurrentPlayer(role == X ? O : X);
-                    }
-
-                    // Selesai memproses langkah
-                    isProcessingMove = false;
-                  })
-              .start();
-
-          return true; // Proses berhasil
-        }
-      }
-      isProcessingMove = false;
     }
-    return false;
+    return super.onTouchEvent(event);
   }
 
   public AI getAi() {

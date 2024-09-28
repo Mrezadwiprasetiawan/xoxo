@@ -1,10 +1,13 @@
 package id.pras.xoxo.ui;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
-public interface BoardInterface {
-  public void drawO(Canvas canvas, int x, int y);
-  public void drawX(Canvas canvas, int x, int y);
-  public void drawBoard(Canvas canvas);
-  public boolean setValue(int x, int y);
-  
+interface BoardInterface {
+  public void drawO(int x, int y);
+  public void drawX(int x, int y);
+  public byte[][] getBoard();
+  public int getWinSize();
+  public boolean getWinState();
+  public byte getCurrentPlayer();
 }

@@ -38,6 +38,7 @@ android {
 	dependencies{
 	  implementation(project(":UI"))
     implementation(project(":Logic"))
+    
 	}
     
 }

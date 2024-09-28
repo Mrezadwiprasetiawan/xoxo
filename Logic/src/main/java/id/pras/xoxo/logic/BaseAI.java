@@ -8,13 +8,13 @@ public class BaseAI extends AI {
   private int bestScore;
   private ArrayList<Coord> minimaxMove=new ArrayList<>();
 
-  public BaseAI(int[][] board, int role) {
-    super(board, 3);
+  public BaseAI(byte[][] getBoard(), byte role) {
+    super(getBoard(), 3);
     setRole(role);
   }
 
-  public BaseAI(int[][] board, int winSize, int role) {
-    super(board, winSize);
+  public BaseAI(byte[][] getBoard(), int winSize, byte role) {
+    super(getBoard(), winSize);
     setRole(role);
   }
 
@@ -54,28 +54,28 @@ public class BaseAI extends AI {
     int counter = 0;
 
     //reset bestScore to currentRealScore
-    bestScore=Evaluator.calcScore(board,winSize());
+    bestScore=Evaluator.calcScore(getBoard()(),winSize());
     
     
-    for (Coord coord : possibleMoves(board)) {
+    for (Coord coord : possibleMoves(getBoard()())) {
       counter++;
       System.out.println("current delay" + (System.nanoTime() - startTime));
       // debugging
       System.out.println("Amount of loops =" + counter);
 
-      board[coord.getX()][coord.getY()] = role; // Ubah langsung tanpa clone
-      int realScore=Evaluator.calcScore(board,winSize());
+      getBoard()[coord.getX()][coord.getY()] = getRole();
+      int realScore=Evaluator.calcScore(getBoard()(),winSize());
       int score =
           minimax(
-              board, depth - 1, -role, realScore, Integer.MIN_VALUE, Integer.MAX_VALUE, startTime, timeout);
+              getBoard(), depth - 1, -role, realScore, Integer.MIN_VALUE, Integer.MAX_VALUE, startTime, timeout);
       
-      board[coord.getX()][coord.getY()] = 0; // Undo move
+      getBoard()[coord.getX()][coord.getY()] = 0; // Undo move
       
       // debugging
       System.out.println("Score =" + score);
       System.out.println("Current Evaluated Move =" + coord.getX() + "," + coord.getY());
 
-      board[coord.getX()][coord.getY()] = 0; // Undo move
+      getBoard()[coord.getX()][coord.getY()] = 0; // Undo move
 
       if ((role == 1 && score > bestScore) || (role == -1 && score < bestScore)) {
 
@@ -109,7 +109,7 @@ public class BaseAI extends AI {
   }
 
   private int minimax(
-      int[][] board,
+      int[][] getBoard(),
       int depth,
       int currentRole,
       int prevScore,
@@ -117,20 +117,20 @@ public class BaseAI extends AI {
       int beta,
       long startTime,
       long timeout) {
-    int score = prevScore+Evaluator.calcScore(board, winSize());
+    int score = prevScore+Evaluator.calcScore(getBoard(), winSize());
     if (depth == 0
         || score == Integer.MAX_VALUE
         || score == Integer.MIN_VALUE
-        || possibleMoves(board).isEmpty()
+        || possibleMoves(getBoard()).isEmpty()
         || System.nanoTime() - startTime >= timeout) {
       return score; // Kembalikan skor jika game over atau kedalaman maksimum
     }
 
     int bestScore = (currentRole == 1) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
-    for (Coord coord : possibleMoves(board)) {
-      board[coord.getX()][coord.getY()] = currentRole; // Ubah langsung tanpa clone
-      int nextScore = minimax(board, depth - 1, -currentRole, score, alpha, beta, startTime, timeout);
+    for (Coord coord : possibleMoves(getBoard())) {
+      getBoard()[coord.getX()][coord.getY()] = currentRole;
+      int nextScore = minimax(getBoard(), depth - 1, -currentRole, score, alpha, beta, startTime, timeout);
 
       if (currentRole == 1) {
         bestScore = Math.max(bestScore, nextScore);
@@ -149,11 +149,11 @@ public class BaseAI extends AI {
     return bestScore;
   }
 
-  private ArrayList<Coord> possibleMoves(int[][] board) {
+  private ArrayList<Coord> possibleMoves(byte[][] getBoard()) {
     ArrayList<Coord> result = new ArrayList<>();
-    for (int y = 0; y < board.length; y++) {
-      for (int x = 0; x < board.length; x++) {
-        if (board[x][y] == 0) result.add(new Coord(x, y));
+    for (int y = 0; y < getBoard().length; y++) {
+      for (int x = 0; x < getBoard().length; x++) {
+        if (getBoard()[x][y] == 0) result.add(new Coord(x, y));
       }
     }
     result.trimToSize();

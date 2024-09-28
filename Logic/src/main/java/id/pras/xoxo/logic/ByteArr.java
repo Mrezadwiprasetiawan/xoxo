@@ -1,18 +1,18 @@
 package id.pras.xoxo.logic;
 
 // Kelas untuk mensupport pembuatan fixed array Integer agar pengisiannya lebih mudah
-public class IntArr {
-  private int[] values;
+public class ByteArr {
+  private byte[] values;
   private int size;
   private int index;
 
-  public IntArr(int size) {
+  public ByteArr(int size) {
     this.size = size;
     this.index = 0;
-    this.values = new int[size];
+    this.values = new byte[size];
   }
 
-  public boolean add(int value) {
+  public boolean add(byte value) {
     if (index + 1 == size) {
       return false;
     }
@@ -21,7 +21,7 @@ public class IntArr {
     return true;
   }
 
-  public void addAll(int[] values) {
+  public void addAll(byte[] values) {
     if (index == 0 && values.length <= size) {
       for (int i = 0; i < values.length; i++) {
         this.values[i] = values[i];
@@ -36,7 +36,7 @@ public class IntArr {
     }
   }
 
-  public int get(int index) {
+  public byte get(int index) {
     if (index >= size) {
       throw new IndexOutOfBoundsException(
           "Cant get Integer on the Index>=Size! index" + index + " size:" + size);
@@ -55,7 +55,7 @@ public class IntArr {
     index=0;
   }
 
-  public int[] values() {
+  public byte[] values() {
     return values;
   }
 

@@ -2,170 +2,187 @@ package id.pras.xoxo.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.view.MotionEvent;
 import android.view.View;
-import id.pras.xoxo.logic.Evaluator;
 
-public abstract class Board extends View {
-  public static final int NULL_HANDLE = 0;
-  public static final int O = 1;
-  public static final int X = -1;
+public abstract class Board extends View implements BoardInterface {
 
-  private final int PADDING_PX = 50; // Tambahkan padding yang lebih besar
-  private Paint paint = new Paint();
-  private int[][] board;
-  private int player;
-  private int sideSize;
+  public static final byte NULL = 0;
+  public static final byte O = 1;
+  public static final byte X = -1;
+
+  private final int PADDING_PX = 50; // Default Board Padding in pixel
+  private final byte[][] board;
+  private byte player;
+  private final int sideSize;
   private int cellSize;
-  private int offsetX;
-  private int offsetY;
-  private int winSize;
+  private float offsetX;
+  private float offsetY;
+  private final int winSize;
   private boolean winState = false;
+  private Canvas canvas;
 
   public Board(Context context, int sideSize, int winSize) {
+    this(context, sideSize, winSize, O);
+  }
+
+  public Board(Context context, int sideSize, int winSize, byte firstPlayer) {
     super(context);
-    if (sideSize < winSize) {
-      throw new IllegalArgumentException(
-          "winSize > sideSize\t" + "winSize :" + winSize + " sideSize :" + sideSize);
-    }
+    if (sideSize == 0) throw new BoardException(BoardException.ZERO_SIDE_SIZE_MSG);
+    if (winSize > sideSize) throw new BoardException(BoardException.WIN_SIZE_EXCEPTION_MSG);
+    if (player==NULL) throw new BoardException(BoardException.ZERO_ROLE_EXCEPTION);
     this.sideSize = sideSize;
+    this.board = new byte[sideSize][sideSize];
     this.winSize = winSize;
-    board = new int[sideSize][sideSize];
-    paint.setStrokeWidth(4);
-    setCurrentPlayer(O);
+    setCurrentPlayer(firstPlayer);
   }
 
-  public boolean setValue(int x, int y, int xoxo) {
-    if (board[x][y] == NULL_HANDLE) {
-      board[x][y] = xoxo;
-      invalidate();
-      return true; // Redraw the view after updating the value
-    }
-    return false;
+  @Override
+  protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    this.canvas = canvas;
+    calcOffsetAndCellSize();
+    drawBoard();
   }
 
-  public int[][] getBoard() {
-    return board;
-  }
-
-  public int getSideSize() {
-    return sideSize;
-  }
-
-  public int getWinSize() {
-    return winSize;
-  }
-
-  protected void drawX(Canvas canvas, int x, int y) {
-    // Tentukan ukuran margin untuk memperkecil X
-    int margin = cellSize / 5;
-
-    // Hitung startX dan startY dengan menambahkan margin
-    int startX = offsetX + x * cellSize + margin;
-    int startY = offsetY + y * cellSize + margin;
-
-    // Tentukan endX dan endY dengan mengurangi margin dari cellSize
-    int endX = offsetX + (x + 1) * cellSize - margin;
-    int endY = offsetY + (y + 1) * cellSize - margin;
-
-    paint.setColor(Color.RED);
-    paint.setStrokeWidth(8);
-
-    // Gambar dua garis diagonal
-    canvas.drawLine(startX, startY, endX, endY, paint);
-    canvas.drawLine(endX, startY, startX, endY, paint);
-  }
-
-  protected void drawO(Canvas canvas, int x, int y) {
-    int startX = offsetX + x * cellSize;
-    int startY = offsetY + y * cellSize;
-    paint.setColor(Color.BLUE);
-    paint.setStrokeWidth(8);
-    paint.setStyle(Paint.Style.STROKE);
-    canvas.drawCircle(startX + cellSize / 2, startY + cellSize / 2, cellSize / 4f, paint);
-  }
-
-  protected void drawBoard(Canvas canvas) {
+  protected void calcOffsetAndCellSize() {
     int widthPx = getWidth();
     int heightPx = getHeight();
 
-    // Calculate cellSize based on the minimum dimension of the view
+    // Memghiting cellSize berdasarkan minimum dimensi dari view
     cellSize = Math.min(widthPx - PADDING_PX, heightPx - PADDING_PX) / sideSize;
 
-    // Calculate offsets to center the board
+    // Menghitung offset berdasarkan cellSize
     offsetX = (widthPx - (cellSize * sideSize)) / 2;
     offsetY = (heightPx - (cellSize * sideSize)) / 2;
+  }
 
+  private void drawBoard() {
+    // Menggambar background berdasarkan offset
+    drawBackground(canvas);
     // Draw the grid
-    paint.setColor(Color.BLACK);
-    paint.setStrokeWidth(4);
     for (int i = 0; i <= sideSize; i++) {
       float posX = offsetX + i * cellSize;
       float posY = offsetY + i * cellSize;
-      canvas.drawLine(posX, offsetY, posX, offsetY + sideSize * cellSize, paint);
-      canvas.drawLine(offsetX, posY, offsetX + sideSize * cellSize, posY, paint);
+      drawBoardLine(canvas, posX, offsetY, posX, offsetY + sideSize * cellSize);
+      drawBoardLine(canvas, offsetX, posY, offsetX + sideSize * cellSize, posY);
     }
 
     // Draw the X and O on the board
     for (int x = 0; x < sideSize; x++) {
       for (int y = 0; y < sideSize; y++) {
-        if (board[x][y] != NULL_HANDLE) {
+        if (board[x][y] != NULL) {
           if (board[x][y] == X) {
-            drawX(canvas, x, y);
+            drawX(x, y);
           } else if (board[x][y] == O) {
-            drawO(canvas, x, y);
+            drawO(x, y);
           }
         }
       }
     }
   }
 
-  @Override
-  protected void onDraw(Canvas canvas) {
-    super.onDraw(canvas);
-    drawBoard(canvas);
-  }
-  
-  @Override
-  public boolean onTouchEvent(MotionEvent event) {
-    if (event.getAction() == 0) {
-      boolean changePlayer = false;
-      int boardX = (int) (event.getX() - offsetX) / cellSize;
-      int boardY = (int) (event.getY() - offsetY) / cellSize;
-      if (boardX >= 0 && boardX < sideSize && boardY >= 0 && boardY < sideSize) {
-        changePlayer = setValue(boardX, boardY, player);
-      }
+  // menggambar latar belakang harus diimplementasikan oleh kelas turunan
+  protected abstract void drawBackground(Canvas canvas);
 
-      if (changePlayer) {
-        if (Evaluator.isWin(board, winSize, player)) {
-          setWinState(true);
-        }else{
-          setCurrentPlayer(player == X ? O : X);
-        }
-        return true;
-      } else {
-        return false;
-      }
+  /*
+   * draw O & draw X method
+   * membutuhkan argumen index x dan y dari papan mana yang akan diset
+   * perhatikan bahwa metode ini hanya bisa dipanggil saat onDraw telah benar benar dipanggil setidaknya satu kali
+   * pengecualian akan dilemparkan jika mencoba memanggil metode ini tanpa menunggu onDraw event dipanggil
+   */
+  public void drawO(int x, int y) {
+    if (canvas == null)
+      throw new RuntimeException("Cant draw O/X before Canvas initialized on onDraw event");
+    drawO(canvas, x, y);
+  }
+
+  @Override
+  public void drawX(int x, int y) {
+    if (canvas == null)
+      throw new RuntimeException("Cant draw O/X before Canvas initialized on onDraw event");
+    drawX(canvas, x, y);
+  }
+
+  // Kelas turunan harus mengimplementasikan metode ini
+  protected abstract void drawO(Canvas canvas, int x, int y);
+
+  protected abstract void drawX(Canvas canvas, int x, int y);
+
+  // menggambar garis kustom untuk papan
+  protected abstract void drawBoardLine(Canvas canvas, float x0, float y0, float x1, float y1);
+
+  protected boolean setValue(int x, int y, byte role) {
+    if (x < 0 || y < 0 || x >= sideSize || y >= sideSize) return false;
+    if (board[x][y] == NULL) {
+      board[x][y] = role;
+
+      // memanggil metode invalidate() agar board digambar ulang
+      invalidate();
+      return true;
     }
-    return super.onTouchEvent(event);
+    return false;
   }
 
-  public boolean getWinState() {
-    return winState;
+  protected boolean setValue(int x, int y) {
+    return setValue(x, y, player);
   }
 
+  // mengembalikan array dari papan saat ini
+  @Override
+  public byte[][] getBoard() {
+    return this.board;
+  }
+
+  // mengembalikan ukuran kemenangan minimum
+  @Override
+  public int getWinSize() {
+    return this.winSize;
+  }
+
+  // hanya kelas turunan yang dapat menset status kemenangan
   protected void setWinState(boolean winState) {
     this.winState = winState;
   }
 
-  public int getCurrentPlayer() {
+  // mengembalikan status kemenangan
+  @Override
+  public boolean getWinState() {
+    return this.winState;
+  }
+
+  public int getCellSize() {
+    return this.cellSize;
+  }
+
+  public float getOffsetX() {
+    return this.offsetX;
+  }
+
+  public float getOffsetY() {
+    return this.offsetY;
+  }
+
+  // hanya kelas turunan yang dapat menset nilai player
+  protected void setCurrentPlayer(byte player) {
+    this.player = player;
+  }
+
+  // mengembalikan player saat ini
+  @Override
+  public byte getCurrentPlayer() {
     return player;
   }
 
-  protected void setCurrentPlayer(int player) {
-    this.player = player;
+  public class BoardException extends RuntimeException {
+
+    public static final String ZERO_ROLE_EXCEPTION="Role cant be 0";
+    public static final String NOT_SQUARE_MSG = "Board not Square";
+    public static final String WIN_SIZE_EXCEPTION_MSG = " Winsize greater than board size!";
+    public static final String ZERO_SIDE_SIZE_MSG = "You cant create Board with zero side size!";
+
+    private BoardException(String msg) {
+      super(msg);
+    }
   }
-  
 }
