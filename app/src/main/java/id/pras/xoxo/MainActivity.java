@@ -22,57 +22,6 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     binding = ActivityMainBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
-
-    MultiPlayerBoard multiBoard = new MultiPlayerBoard(getBaseContext(), 8, 5, Board.O);
-    SinglePlayerBoard singleboard = new SinglePlayerBoard(getBaseContext(), 8, 5, Board.O);
-    Board board = singleboard;
-    BaseAI ai=new BaseAI(board.getBoard(), 5, Board.O);
-    board.setLayoutParams(
-        new ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-    binding.getRoot().addView(board);
-    winState =
-        new Thread(
-            () -> {
-              while (!board.getWinState()) {
-                this.running = true;
-                if (singleboard.getAi().IsRunning()) {
-                  runOnUiThread(
-                      () -> {
-                        binding.debugOutput.setText("AI sedang berfikir");
-                      });
-                  First = true;
-                } else if (First) {
-                  runOnUiThread(
-                      () -> {
-                        int[] result = singleboard.getAi().getResult();
-                        binding.debugOutput.setText("Result =" + result[0] + "," + result[1]);
-                String boardArr="";
-                boardArr+="[\n";
-                for(int x=0;x<singleboard.getBoard().length;x++){
-                  for (int y=0;y<singleboard.getBoard().length;y++){
-                    boardArr+=" "+singleboard.getBoard()[x][y]+",";
-                  }
-                  boardArr+="\n";
-                }
-                boardArr+="]";
-                binding.debugOutput.setText("\n Board = "+boardArr);
-                      });
-                  First = false;
-                }
-              }
-              this.running = false;
-              runOnUiThread(
-                  () -> {
-                    binding.getRoot().removeView(board);
-                    android.widget.Toast.makeText(
-                            getBaseContext(),
-                            "Role " + (board.getCurrentPlayer() == 1 ? "O" : "X") + " is Win",
-                            android.widget.Toast.LENGTH_LONG)
-                        .show();
-                  });
-            });
-    winState.start();
   }
 
   @Override

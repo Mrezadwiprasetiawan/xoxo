@@ -3,22 +3,45 @@ package id.pras.xoxo.logic;
 import java.util.ArrayList;
 
 /*
- * Kelas statis untuk mengevaluasi logika permainan
- * metode publik yang bisa dipakai adalah :
- *   calcScore(byte[][] board, int winSize) :
- *     metode untuk menghitung Skor total
- *   isWin(byte[][] board, int winSize, byte role) :
- *     metode untuk memeriksa apakah role tertentu menang
- * kelas dibuat final agar tidak bisa diturunkan
+ * Static class for evaluating game logic.
+ *
+ * Public methods that can be used:
+ *   - {@link #calcScore(byte[][], int)}:
+ *     Method to calculate the total score.
+ *   - {@link #isWin(byte[][], int, byte)}:
+ *     Method to check if a specific role has won.
+ *
+ * This class is declared as final to prevent inheritance.
+ *
+ * @author [M Reza Dwi Prasetiawan]
+ * @version 1.2
  */
 public final class Evaluator {
-  private static final byte NULL_HANDLE=0;
-  private static final byte O=1;
-  private static final byte X=-1;
+  /** @value #NULL_HANDLE */
+  public static final byte NULL_HANDLE = 0;
+  /** @value #O */
+  public static final byte O = 1;
+  /** @value #X */
+  public static final byte X = -1;
+
   // kelas sepenuhnya statis
   private Evaluator() {}
 
-  // metode untuk menghitung skor
+  /**
+   * Calculates the total score for the given game board.
+   *
+   * <p>This method checks if player O or X has won the game. If player O has won, it returns {@link
+   * Integer#MAX_VALUE}. If player X has won, it returns {@link Integer#MIN_VALUE}. If neither
+   * player has won, it calculates the score based on vertical, horizontal, and diagonal alignments
+   * of symbols on the board.
+   *
+   * @param board a 2D byte array representing the game board, where 0 represents an empty cell, 1
+   *     represents player O, and -1 represents player X.
+   * @param winSize the size required to win (i.e., the number of symbols in a row needed for
+   *     victory).
+   * @return the calculated score based on the current state of the game board.
+   * @throws IllegalArgumentException if the board is not square.
+   */
   public static int calcScore(byte[][] board, int winSize) {
     if (isWin(board, winSize, O)) {
       return Integer.MAX_VALUE;
@@ -199,24 +222,94 @@ public final class Evaluator {
 
     return result;
   }
-  /*
-  Sequence[] existingSequences(byte[][] board, int winSize){
-    ArrayList<Sequence> result=new ArrayList<>();
-    //vertical array
-    Sequence tmpO;
-    Sequence tmpX;
-    for(int x=0;x<board.length;x++)
-      for(int y=0;y<board.length;y++){
-        board[x][y]=O;
+
+  // Metode untuk menemukan urutan yang sudah ada
+  Sequence[] existingSequences(byte[][] board, int winSize) {
+    ArrayList<Sequence> result = new ArrayList<>();
+
+    // Mengecek urutan secara vertikal, horizontal, dan diagonal
+    // Vertical
+    for (int x = 0; x < board.length; x++) {
+      for (int y = 0; y <= board.length - winSize; y++) {
+        checkSequence(board, result, x, y, 0, 1, winSize); // 0, 1 untuk vertikal
       }
-    return result.toArray(new Sequence[]{});
+    }
+
+    // Horizontal
+    for (int x = 0; x <= board.length - winSize; x++) {
+      for (int y = 0; y < board.length; y++) {
+        checkSequence(board, result, x, y, 1, 0, winSize); // 1, 0 untuk horizontal
+      }
+    }
+
+    // Diagonal kanan bawah
+    for (int x = 0; x <= board.length - winSize; x++) {
+      for (int y = 0; y <= board.length - winSize; y++) {
+        checkSequence(board, result, x, y, 1, 1, winSize); // 1, 1 untuk diagonal
+      }
+    }
+
+    // Diagonal kiri bawah
+    for (int x = 0; x <= board.length - winSize; x++) {
+      for (int y = winSize - 1; y < board.length; y++) {
+        checkSequence(board, result, x, y, 1, -1, winSize); // 1, -1 untuk diagonal
+      }
+    }
+
+    return result.toArray(new Sequence[0]);
   }
-  
-  Sequence[] existingSequence(){
-    ArrayList<Sequence> result=new ArrayList<>();
-    return result.toArray(new Sequence[]{});
+
+  // Metode untuk mengecek dan menambahkan urutan
+  private void checkSequence(
+      byte[][] board,
+      ArrayList<Sequence> result,
+      int startX,
+      int startY,
+      int deltaX,
+      int deltaY,
+      int winSize) {
+    byte currentType = board[startX][startY];
+    if (currentType == 0) return; // Tidak ada urutan jika tipe adalah 0 (kosong)
+
+    Sequence sequence = new Sequence(currentType, winSize);
+    int count = 1;
+    boolean blockedStart = false;
+    boolean blockedEnd = false;
+
+    // Mengecek arah positif
+    for (int i = 1; i < winSize; i++) {
+      int newX = startX + i * deltaX;
+      int newY = startY + i * deltaY;
+      if (newX >= board.length
+          || newY >= board.length
+          || newY < 0
+          || board[newX][newY] != currentType) {
+        blockedEnd = true; // Jika terblokir di akhir
+        break;
+      }
+      count++;
+      sequence.add();
+    }
+
+    // Mengecek arah negatif
+    for (int i = 1; i < winSize; i++) {
+      int newX = startX - i * deltaX;
+      int newY = startY - i * deltaY;
+      if (newX < 0 || newY >= board.length || newY < 0 || board[newX][newY] != currentType) {
+        blockedStart = true; // Jika terblokir di awal
+        break;
+      }
+      count++;
+      sequence.add();
+    }
+
+    // Jika ada urutan valid, tambahkan ke hasil
+    if (count >= winSize) {
+      if (blockedStart) sequence.setBlockedStart();
+      if (blockedEnd) sequence.setBlockedEnd();
+      result.add(sequence);
+    }
   }
-  */
 
   // kelas tambahan untuk dukungan penghitungan skor
   private static class Sequence {
@@ -272,10 +365,19 @@ public final class Evaluator {
     }
   }
 
-  // metode publik untuk memeriksa apakah role tertentu memang
-  /*
-   * metode ini memeriksa apakah ada role tertentu menang dalam arah vertikal, horizontal, maupun diagonal
-   * dengan bantuan kelas IntArr
+  /**
+   * Checks if the specified player has won the game on the given board.
+   *
+   * <p>This method verifies if the player represented by the specified symbol has achieved the
+   * required alignment (winSize) in any direction: vertically, horizontally, or diagonally.
+   *
+   * @param board a 2D byte array representing the game board, where 0 represents an empty cell, 1
+   *     represents player O, and -1 represents player X.
+   * @param winSize the size required to win (i.e., the number of symbols in a row needed for
+   *     victory).
+   * @param playerSymbol the symbol of the player to check for a win (O or X).
+   * @return true if the specified player has won, false otherwise.
+   * @throws IllegalArgumentException if the board is not square.
    */
   public static boolean isWin(byte[][] board, int winSize, byte role) {
     if (role == NULL_HANDLE)
