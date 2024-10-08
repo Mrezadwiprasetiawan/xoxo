@@ -1,3 +1,4 @@
+package id.pras.xoxo.ui;
 /**
  * Interface that defines essential methods for the Tic-Tac-Toe (XOXO) game board.
  * This interface provides methods to draw O and X symbols on the board, 

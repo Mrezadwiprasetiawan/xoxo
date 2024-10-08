@@ -2,7 +2,7 @@ package id.pras.xoxo.logic;
 
 import java.util.ArrayList;
 
-/*
+/**
  * Static class for evaluating game logic.
  *
  * Public methods that can be used:
@@ -11,135 +11,102 @@ import java.util.ArrayList;
  *   - {@link #isWin(byte[][], int, byte)}:
  *     Method to check if a specific role has won.
  *
+ * This is the main Logic of the game where everything calculated precisely.
+ *
  * This class is declared as final to prevent inheritance.
  *
  * @author [M Reza Dwi Prasetiawan]
- * @version 1.2
+ * @version 1.3
  */
 public final class Evaluator {
-  /** @value #NULL_HANDLE */
   public static final byte NULL_HANDLE = 0;
-  /** @value #O */
   public static final byte O = 1;
-  /** @value #X */
   public static final byte X = -1;
+  
+  //debugging
+  public enum straightType{
+    VERTICAL,
+    HORIZONTAL,
+    DIAGONAL1,
+    DIAGONAL2,
+    DIAGONAL3,
+    DIAGONAL4;
+    public void print(){
+      switch(this){
+        case VERTICAL:System.out.print("vertical"); break;
+        case HORIZONTAL:System.out.print("horizontal"); break;
+        case DIAGONAL1:System.out.print("diagonal1"); break;
+        case DIAGONAL2:System.out.print("diagonal2"); break;
+        case DIAGONAL3:System.out.print("diagonal3"); break;
+        case DIAGONAL4:System.out.print("diagonal4"); break;
+      }
+    }
+  }
 
-  // kelas sepenuhnya statis
   private Evaluator() {}
 
-  /**
-   * Calculates the total score for the given game board.
-   *
-   * <p>This method checks if player O or X has won the game. If player O has won, it returns {@link
-   * Integer#MAX_VALUE}. If player X has won, it returns {@link Integer#MIN_VALUE}. If neither
-   * player has won, it calculates the score based on vertical, horizontal, and diagonal alignments
-   * of symbols on the board.
-   *
-   * @param board a 2D byte array representing the game board, where 0 represents an empty cell, 1
-   *     represents player O, and -1 represents player X.
-   * @param winSize the size required to win (i.e., the number of symbols in a row needed for
-   *     victory).
-   * @return the calculated score based on the current state of the game board.
-   * @throws IllegalArgumentException if the board is not square.
-   */
   public static int calcScore(byte[][] board, int winSize) {
     if (isWin(board, winSize, O)) {
       return Integer.MAX_VALUE;
     } else if (isWin(board, winSize, X)) {
       return Integer.MIN_VALUE;
     }
-    return calcVerticalScore(board, winSize)
-        + calcHorizontalScore(board, winSize)
-        + calcDiagonalScore(board, winSize);
-  }
-
-  // sementara dibuat private
-  private static int calcVerticalScore(byte[][] board, int winSize) {
-    int yLen = board.length;
-    int xLen = 0;
-    int result = 0;
-
-    if (yLen != 0) xLen = board[0].length;
-    if (xLen != yLen)
-      throw new IllegalArgumentException("Board must be square! boardSize :" + xLen + "×" + yLen);
-    for (int x = 0; x < xLen; x++) result += calcStraightScore(board[x], winSize);
+    int result=0;
+    for(Sequence seq:AllDirectionSequences(board,winSize)) result+=seq.score();
     return result;
   }
-
-  // sementara dibuat private
-  private static int calcHorizontalScore(byte[][] board, int winSize) {
+  
+  public static Sequence[] AllDirectionSequences(byte[][] board, int winSize){
+    ArrayList<Sequence> result=new ArrayList<>();
     int yLen = board.length;
     int xLen = 0;
-    int result = 0;
 
     if (yLen != 0) xLen = board[0].length;
     if (xLen != yLen)
       throw new IllegalArgumentException("Board must be square! boardSize :" + xLen + "×" + yLen);
-
-    for (int y = 0; y < yLen; y++) {
-      byte[] straight = new byte[board.length];
-      for (int x = 0; x < board.length; x++) straight[x] = board[x][y];
-      result += calcStraightScore(straight, winSize);
-    }
-
-    return result;
-  }
-
-  // sementara dibuat private
-  private static int calcDiagonalScore(byte[][] board, int winSize) {
-    int yLen = board.length;
-    int xLen = 0;
-    int result = 0;
-
-    if (yLen != 0) xLen = board[0].length;
-    if (xLen != yLen)
-      throw new IllegalArgumentException("Board must be square! boardSize :" + xLen + "×" + yLen);
-
     int sideSize = board.length;
-
+    //vertical
+    for (int x = 0; x < sideSize; x++)
+    for(Sequence seq:straightSequences(board[x],winSize,straightType.VERTICAL)) result.add(seq);
+    
+    //horizontal
+    for (int y = 0; y < yLen; y++) {
+      byte[] straight = new byte[sideSize];
+      for (int x = 0; x < sideSize; x++) straight[x] = board[x][y];
+      for(Sequence seq:straightSequences(straight,winSize,straightType.HORIZONTAL)) result.add(seq);
+    }
+    
+    //diagonal
     for (int startX = 0; startX <= sideSize - winSize; startX++) {
       byte[] diagonal1 = new byte[sideSize - startX];
-      byte[] diagonal2 = new byte[sideSize - startX];
       for (int i = 0; i < sideSize - startX; i++) {
-        diagonal1[i] = board[startX + i][i]; // Diagonal dari kiri atas ke kanan bawah
-        diagonal2[i] = board[i][startX + i]; // Diagonal dari kanan atas ke kiri bawah
+        diagonal1[i] = board[startX + i][i];
       }
-      result += calcStraightScore(diagonal1, winSize);
-      result += calcStraightScore(diagonal2, winSize);
+      for(Sequence seq:straightSequences(diagonal1,winSize,straightType.DIAGONAL1)) result.add(seq);
     }
 
     for (int startX = 0; startX <= sideSize - winSize; startX++) {
-      byte[] diagonal1 = new byte[sideSize - startX];
       byte[] diagonal2 = new byte[sideSize - startX];
       for (int i = 0; i < sideSize - startX; i++) {
-        diagonal1[i] =
-            board[i][sideSize - 1 - (startX + i)]; // Diagonal dari kiri bawah ke kanan atas
-        diagonal2[i] =
-            board[startX + i][sideSize - 1 - i]; // Diagonal dari kanan bawah ke kiri atas
+        diagonal2[i] = board[startX + i][sideSize - 1 - i];
       }
-      result += calcStraightScore(diagonal1, winSize);
-      result += calcStraightScore(diagonal2, winSize);
+      for(Sequence seq:straightSequences(diagonal2, winSize,straightType.DIAGONAL4)) result.add(seq);
     }
 
-    return result;
+    result.trimToSize();
+    return result.toArray(new Sequence[]{});
   }
 
-  /* menghitung score berdasarkan jumlah simbol pada array
-   * jika simbol diblokir di salah satu ujung(awal atau akhir) maka nilai sementara urutan simbol dikurangi 1
-   * jika simbol diblokir di keduanya maka nilai sementara urutan simbol itu menjadi 0
-   */
-  // dibuat publik untuk debugging atau kegunaan lain
-  public static int calcStraightScore(byte[] straight, int winSize) {
+  public static ArrayList<Sequence> straightSequences(byte[] straight, int winSize, straightType type) {
     int result = 0;
     byte prevVal = NULL_HANDLE;
     ArrayList<Sequence> elements = new ArrayList<>();
-    Sequence elementO = new Sequence(O, winSize);
-    Sequence elementX = new Sequence(X, winSize);
+    Sequence elementO = new Sequence(O, winSize,type);
+    Sequence elementX = new Sequence(X, winSize, type);
 
     for (int i = 0; i < straight.length; i++) {
       byte currVal = straight[i];
 
-      // Penanganan elemen pertama
       if (i == 0) {
         if (currVal == O) {
           elementO.add();
@@ -149,7 +116,6 @@ public final class Evaluator {
           elementX.setBlockedStart();
         }
       }
-      // Penanganan elemen di tengah-tengah array
       else if (i != straight.length - 1) {
         if (prevVal == currVal || prevVal == NULL_HANDLE) {
           if (currVal == O) {
@@ -161,27 +127,26 @@ public final class Evaluator {
           if (currVal == O) {
             elementX.setBlockedEnd();
             elements.add(elementX);
-            elementX = new Sequence(X, winSize); // Reset sequence X
+            elementX = new Sequence(X, winSize, type);
             elementO.setBlockedStart();
             elementO.add();
           } else if (currVal == X) {
             elementO.setBlockedEnd();
             elements.add(elementO);
-            elementO = new Sequence(O, winSize); // Reset sequence O
+            elementO = new Sequence(O, winSize, type);
             elementX.setBlockedStart();
             elementX.add();
           } else {
             if (prevVal == O) {
               elements.add(elementO);
-              elementO = new Sequence(O, winSize); // Reset sequence O
+              elementO = new Sequence(O, winSize, type);
             } else if (prevVal == X) {
               elements.add(elementX);
-              elementX = new Sequence(X, winSize); // Reset sequence X
+              elementX = new Sequence(X, winSize, type);
             }
           }
         }
       }
-      // Penanganan elemen terakhir
       else {
         if (currVal != NULL_HANDLE) {
           if (currVal == O) {
@@ -214,133 +179,42 @@ public final class Evaluator {
 
       prevVal = currVal;
     }
-
-    // Menghitung total nilai berdasarkan elemen dalam ArrayList
-    for (Sequence seq : elements) {
-      result += seq.score();
-    }
-
-    return result;
+    return elements;
   }
 
-  // Metode untuk menemukan urutan yang sudah ada
-  Sequence[] existingSequences(byte[][] board, int winSize) {
-    ArrayList<Sequence> result = new ArrayList<>();
-
-    // Mengecek urutan secara vertikal, horizontal, dan diagonal
-    // Vertical
-    for (int x = 0; x < board.length; x++) {
-      for (int y = 0; y <= board.length - winSize; y++) {
-        checkSequence(board, result, x, y, 0, 1, winSize); // 0, 1 untuk vertikal
-      }
-    }
-
-    // Horizontal
-    for (int x = 0; x <= board.length - winSize; x++) {
-      for (int y = 0; y < board.length; y++) {
-        checkSequence(board, result, x, y, 1, 0, winSize); // 1, 0 untuk horizontal
-      }
-    }
-
-    // Diagonal kanan bawah
-    for (int x = 0; x <= board.length - winSize; x++) {
-      for (int y = 0; y <= board.length - winSize; y++) {
-        checkSequence(board, result, x, y, 1, 1, winSize); // 1, 1 untuk diagonal
-      }
-    }
-
-    // Diagonal kiri bawah
-    for (int x = 0; x <= board.length - winSize; x++) {
-      for (int y = winSize - 1; y < board.length; y++) {
-        checkSequence(board, result, x, y, 1, -1, winSize); // 1, -1 untuk diagonal
-      }
-    }
-
-    return result.toArray(new Sequence[0]);
-  }
-
-  // Metode untuk mengecek dan menambahkan urutan
-  private void checkSequence(
-      byte[][] board,
-      ArrayList<Sequence> result,
-      int startX,
-      int startY,
-      int deltaX,
-      int deltaY,
-      int winSize) {
-    byte currentType = board[startX][startY];
-    if (currentType == 0) return; // Tidak ada urutan jika tipe adalah 0 (kosong)
-
-    Sequence sequence = new Sequence(currentType, winSize);
-    int count = 1;
-    boolean blockedStart = false;
-    boolean blockedEnd = false;
-
-    // Mengecek arah positif
-    for (int i = 1; i < winSize; i++) {
-      int newX = startX + i * deltaX;
-      int newY = startY + i * deltaY;
-      if (newX >= board.length
-          || newY >= board.length
-          || newY < 0
-          || board[newX][newY] != currentType) {
-        blockedEnd = true; // Jika terblokir di akhir
-        break;
-      }
-      count++;
-      sequence.add();
-    }
-
-    // Mengecek arah negatif
-    for (int i = 1; i < winSize; i++) {
-      int newX = startX - i * deltaX;
-      int newY = startY - i * deltaY;
-      if (newX < 0 || newY >= board.length || newY < 0 || board[newX][newY] != currentType) {
-        blockedStart = true; // Jika terblokir di awal
-        break;
-      }
-      count++;
-      sequence.add();
-    }
-
-    // Jika ada urutan valid, tambahkan ke hasil
-    if (count >= winSize) {
-      if (blockedStart) sequence.setBlockedStart();
-      if (blockedEnd) sequence.setBlockedEnd();
-      result.add(sequence);
-    }
-  }
-
-  // kelas tambahan untuk dukungan penghitungan skor
-  private static class Sequence {
+  public static class Sequence {
     private byte type;
     private boolean blockedStart;
     private boolean blockedEnd;
     private int score;
     private int winSize;
+    private straightType directType;
 
-    public Sequence(byte type, int winSize) {
+    public Sequence(byte type, int winSize, straightType directType) {
       this.type = type;
       blockedStart = false;
       blockedEnd = false;
       score = 0;
       this.winSize = winSize;
+      this.directType=directType;
     }
 
     public void add() {
-      score += type; // Tambah skor berdasarkan tipe
+      score += type;
+    }
+
+    public straightType getDirectType() {
+      return this.directType;
     }
 
     public void setBlockedStart() {
       this.blockedStart = true;
     }
 
-    // debugging
     public boolean getBlockedStart() {
       return this.blockedStart;
     }
 
-    // debugging
     public boolean getBlockedEnd() {
       return this.blockedEnd;
     }
@@ -349,36 +223,21 @@ public final class Evaluator {
       this.blockedEnd = true;
     }
 
-    // debugging
     public int realScore() {
       return score;
     }
 
     public int score() {
       if (blockedStart ^ blockedEnd) {
-        return score - type; // Jika diblokir di satu sisi
+        return score - type;
       } else if (blockedStart && blockedEnd) {
-        return 0; // Jika diblokir di kedua sisi
+        return 0;
       } else {
-        return score >= winSize - 2 ? score * 2 : score; // Jika tidak diblokir
+        return score;
       }
     }
   }
 
-  /**
-   * Checks if the specified player has won the game on the given board.
-   *
-   * <p>This method verifies if the player represented by the specified symbol has achieved the
-   * required alignment (winSize) in any direction: vertically, horizontally, or diagonally.
-   *
-   * @param board a 2D byte array representing the game board, where 0 represents an empty cell, 1
-   *     represents player O, and -1 represents player X.
-   * @param winSize the size required to win (i.e., the number of symbols in a row needed for
-   *     victory).
-   * @param playerSymbol the symbol of the player to check for a win (O or X).
-   * @return true if the specified player has won, false otherwise.
-   * @throws IllegalArgumentException if the board is not square.
-   */
   public static boolean isWin(byte[][] board, int winSize, byte role) {
     if (role == NULL_HANDLE)
       throw new IllegalArgumentException("role cant be NULL_HANDLE or 0 :" + role);
@@ -395,29 +254,27 @@ public final class Evaluator {
     return false;
   }
 
-  // mengevaluasi kemenangan pada arah vertikal
   private static boolean evaluateVertical(byte[][] board, int winSize, byte role) {
     int sideSize = board.length;
     ByteArr checker = new ByteArr(winSize);
     for (int x = 0; x < sideSize; x++) {
-      checker.resetAllToZero(); // Reset checker untuk setiap kolom
+      checker.resetAllToZero();
       for (int y = 0; y < sideSize; y++) {
         if (board[x][y] == role) {
           if (!checker.add(role)) return true;
         } else {
-          checker.resetAllToZero(); // Reset jika tidak sama
+          checker.resetAllToZero();
         }
       }
     }
     return false;
   }
 
-  // mengevaluasi kemenangan pada arah horizontal
   private static boolean evaluateHorizontal(byte[][] board, int winSize, byte role) {
     int sideSize = board.length;
     ByteArr checker = new ByteArr(winSize);
     for (int y = 0; y < sideSize; y++) {
-      checker.resetAllToZero(); // Reset checker untuk setiap baris
+      checker.resetAllToZero();
       for (int x = 0; x < sideSize; x++) {
         if (board[x][y] == role) {
           if (!checker.add(role)) return true;

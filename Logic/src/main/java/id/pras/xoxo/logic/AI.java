@@ -35,6 +35,7 @@ public abstract class AI {
 
   /** The maximum allowed time for AI to make its move, in nanoseconds. */
   private long timeout;
+  
 
   /**
    * Constructs an AI with a specific board and win size.
@@ -43,11 +44,12 @@ public abstract class AI {
    * @param board the board on which the AI operates
    * @param winSize the number of consecutive pieces required to win the game
    */
-  public AI(byte[][] board, int winSize) {
+  public AI(byte[][] board, int winSize, byte role) {
     this.board = board.clone();
     this.sideSize = board.length;
     this.winSize = winSize;
     this.timeout = 2000_000_000;
+    this.role = role;
   }
   
   /**
@@ -56,6 +58,7 @@ public abstract class AI {
    * @param nanoTimeout the timeout duration in nanoseconds
    */
   public void setTimeout(long nanoTimeout) {
+    if(nanoTimeout>=0x7fff_ffff_ffff_ffffL) return;
     this.timeout = nanoTimeout;
   }
 
